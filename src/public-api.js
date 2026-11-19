@@ -1,7 +1,7 @@
 'use strict';
 const express = require('express');
 const crypto = require('crypto');
-const { AppError, validateRegistration, normName } = require('./domain');
+const { AppError, validateRegistration, normName, AGE_GROUPS } = require('./domain');
 const sec = require('./security');
 const sh = require('./shared');
 const { tx } = require('./db');
@@ -21,7 +21,11 @@ function buildFaq(settings, categories) {
     { q: 'ເຮັດລິ້ງ ຫຼື ລະຫັດເຂົ້າເບິ່ງເສຍ ຕ້ອງເຮັດແນວໃດ?', a: 'ຕິດຕໍ່ຜູ້ຈັດງານ. ພະນັກງານຈະກວດຢືນຢັນຕົວຕົນ ແລະ ອອກລະຫັດໃໝ່ໃຫ້. ເບີໂທຢ່າງດຽວບໍ່ພຽງພໍສຳລັບການຢືນຢັນຕົວຕົນ.' },
   ];
   if (senior && senior.active && senior.min_age) {
-    faq.push({ q: 'ລຸ້ນອາວຸໂສ ນັບອາຍຸແນວໃດ?', a: `ນັບອາຍຸໃນວັນແຂ່ງຂັນ. ຕ້ອງມີອາຍຸ ${senior.min_age} ປີຂຶ້ນໄປ ໃນວັນທີ ${d} ${months[m - 1]} ${y}.` });
+    faq.push({ q: `${senior.name_lo} ນັບອາຍຸແນວໃດ?`, a: `ນັບອາຍຸໃນວັນແຂ່ງຂັນ. ຕ້ອງມີອາຍຸ ${senior.min_age} ປີຂຶ້ນໄປ ໃນວັນທີ ${d} ${months[m - 1]} ${y}.` });
+  }
+  const gen = categories.find((c) => c.code === 'general');
+  if (gen && gen.active && AGE_GROUPS.general.length > 1) {
+    faq.push({ q: `${gen.name_lo} ${gen.distance_km} KM ແບ່ງລາງວັນແນວໃດ?`, a: `ແບ່ງຊາຍ ແລະ ຍິງ, ແຕ່ລະເພດແບ່ງ ${AGE_GROUPS.general.length} ກຸ່ມອາຍຸ: ${AGE_GROUPS.general.map((g) => g.label).join(' ແລະ ')} (ນັບອາຍຸໃນວັນແຂ່ງຂັນ).${gen.min_age ? ` ຕ້ອງມີອາຍຸ ${gen.min_age} ປີຂຶ້ນໄປ.` : ''} ອັນດັບ 1–3 ຂອງທຸກກຸ່ມ ຮັບຂັນ.` });
   }
   if (fam && fam.active) {
     faq.push({ q: 'ລຸ້ນ Family ຄິດເງິນແນວໃດ?', a: `${fam.base_members} ຄົນທຳອິດ ${fmt(fam.base_fee)} ກີບຕໍ່ທີມ. ຕັ້ງແຕ່ຄົນທີ ${fam.base_members + 1} ເປັນຕົ້ນໄປ ເພີ່ມຄົນລະ ${fmt(fam.extra_fee)} ກີບ. ຈ່າຍຄັ້ງດຽວສຳລັບທັງທີມໄດ້.` });
@@ -63,6 +67,7 @@ module.exports = function publicApi({ pool, config }) {
       categories: categories.filter((c) => c.active).map((c) => ({
         code: c.code, name: c.name_lo, distanceKm: c.distance_km, baseFee: c.base_fee, baseMembers: c.base_members,
         extraFee: c.extra_fee, minMembers: c.min_members, maxMembers: c.max_members, minAge: c.min_age,
+        ageGroups: (AGE_GROUPS[c.code] || []).map((g) => g.label),
       })),
     });
   });

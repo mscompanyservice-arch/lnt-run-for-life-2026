@@ -79,7 +79,7 @@
     unpaid: 'ຍັງບໍ່ໄດ້ຈ່າຍ', awaiting_review: 'ລໍຖ້າກວດສອບການຈ່າຍ', confirmed: 'ຢືນຢັນການຈ່າຍແລ້ວ', rejected: 'ຫຼັກຖານບໍ່ຜ່ານ — ກະລຸນາສົ່ງໃໝ່',
   };
   const GENDER = { male: 'ຊາຍ', female: 'ຍິງ' };
-  const CAT = { general: 'ລຸ້ນທົ່ວໄປ', senior: 'ລຸ້ນອາວຸໂສ', family: 'ລຸ້ນ Family' };
+  const CAT = { general: 'ລຸ້ນທົ່ວໄປ', senior: 'ລຸ້ນ Masters', family: 'ລຸ້ນ Family' };
   const payBadge = (s) => `<span class="badge b-${esc(s)}">${esc(PAY[s] || s)}</span>`;
 
   async function copyText(text) {

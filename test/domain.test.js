@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { computeFee, ageOn, normalizePhone } = require('../src/domain');
+const { computeFee, ageOn, ageGroup, normalizePhone } = require('../src/domain');
 const { csvCell, toCsv, sniffImage, accessCodeFor, hashAccessCode } = require('../src/security');
 
 const FAMILY = { base_fee: 880000, base_members: 3, extra_fee: 299000 };
@@ -21,6 +21,16 @@ test('age is calculated on event date; 45/48-year boundaries', () => {
   assert.equal(ageOn('1978-12-27', '2026-12-26'), 47);
   assert.equal(ageOn('1980-02-29', '2026-12-26'), 46);
   assert.equal(ageOn('2026-02-30', '2026-12-26'), null);
+});
+
+test('prize age groups: General 15–34 / 35+, Masters 40+, Family none', () => {
+  assert.equal(ageGroup('general', 15), '15–34 ປີ');
+  assert.equal(ageGroup('general', 34), '15–34 ປີ');
+  assert.equal(ageGroup('general', 35), '35 ປີຂຶ້ນໄປ');
+  assert.equal(ageGroup('general', 60), '35 ປີຂຶ້ນໄປ');
+  assert.equal(ageGroup('senior', 40), '40 ປີຂຶ້ນໄປ');
+  assert.equal(ageGroup('family', 30), '');
+  assert.equal(ageGroup('general', null), '');
 });
 
 test('Lao phone normalization', () => {

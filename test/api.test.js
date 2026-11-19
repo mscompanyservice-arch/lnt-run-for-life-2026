@@ -30,14 +30,24 @@ test('general male and female entries cost 380,000 and are 10 KM', async () => {
   }
 });
 
-test('senior entries cost 330,000 at 5 KM; exact 45-year boundary', async () => {
-  const ok = await register(H.individual('senior', { dob: '1981-12-26' }));
+test('Masters (senior) entries cost 330,000 at 5 KM; exact 40-year boundary', async () => {
+  const ok = await register(H.individual('senior', { dob: '1986-12-26' }));
   assert.equal(ok.registration.fee.total, 330000);
   assert.equal(ok.registration.distanceKm, 5);
-  const no = await post('/registrations', H.individual('senior', { dob: '1981-12-27' }));
+  const no = await post('/registrations', H.individual('senior', { dob: '1986-12-27' }));
   assert.equal(no.status, 400);
   assert.equal(no.data.error, 'VALIDATION');
-  assert.ok(no.data.fields['members.0.dob'].includes('45'));
+  assert.ok(no.data.fields['members.0.dob'].includes('40'));
+  assert.ok(no.data.fields['members.0.dob'].includes('Masters'));
+});
+
+test('General 10 KM needs age 15 on event day; config exposes prize age groups', async () => {
+  assert.ok(await register(H.individual('general', { dob: '2011-12-26' })));
+  const no = await post('/registrations', H.individual('general', { dob: '2011-12-27' }));
+  assert.equal(no.status, 400);
+  assert.ok(no.data.fields['members.0.dob'].includes('15'));
+  const cfg = (await H.req(base, 'GET', '/api/public/config')).data;
+  assert.deepEqual(cfg.categories.find((c) => c.code === 'general').ageGroups, ['15–34 ປີ', '35 ປີຂຶ້ນໄປ']);
 });
 
 test('family totals for 3, 4, 5, 6 and 10 members; each member stored separately', async () => {

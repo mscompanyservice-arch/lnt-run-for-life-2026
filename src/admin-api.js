@@ -1,7 +1,7 @@
 'use strict';
 const express = require('express');
 const crypto = require('crypto');
-const { AppError, bad, cleanText, normalizePhone, parseDate, ageOn, computeFee, GENDERS, CATEGORY_DISTANCE } = require('./domain');
+const { AppError, bad, cleanText, normalizePhone, parseDate, ageOn, ageGroup, computeFee, GENDERS, CATEGORY_DISTANCE } = require('./domain');
 const sec = require('./security');
 const sh = require('./shared');
 const { tx } = require('./db');
@@ -214,7 +214,7 @@ module.exports = function adminApi({ pool, config }) {
     if (!reg) throw new AppError(404, 'NOT_FOUND', 'ບໍ່ພົບການລົງທະບຽນ');
     delete reg.access_hash; delete reg.idempotency_key; delete reg.request_fingerprint;
     const settings = await sh.loadSettings(pool);
-    reg.participants.forEach((p) => { p.age_on_event = ageOn(p.dob, settings.eventDate); });
+    reg.participants.forEach((p) => { p.age_on_event = ageOn(p.dob, settings.eventDate); p.age_group = ageGroup(reg.category_code, p.age_on_event); });
     if (!can(req.staff, 'pay.read')) reg.proofs = reg.proofs.map((p) => ({ id: p.id, review_status: p.review_status, uploaded_at: p.uploaded_at }));
     reg.payment_events = (await pool.query(
       `SELECT e.action, e.amount, e.note, e.created_at, s.display_name AS staff FROM payment_events e LEFT JOIN staff s ON s.id=e.staff_id
@@ -306,7 +306,7 @@ module.exports = function adminApi({ pool, config }) {
     const fee = await tx(pool, async (c) => {
       const reg = await lockReg(c, id);
       if (reg.reg_type !== 'individual' || !['general', 'senior'].includes(b.category)) {
-        throw bad('BAD_CATEGORY_CHANGE', 'ປ່ຽນລຸ້ນໄດ້ສະເພາະ ລຸ້ນທົ່ວໄປ ↔ ລຸ້ນອາວຸໂສ');
+        throw bad('BAD_CATEGORY_CHANGE', 'ປ່ຽນລຸ້ນໄດ້ສະເພາະ ລຸ້ນທົ່ວໄປ ↔ ລຸ້ນ Masters');
       }
       if (b.category === reg.category_code) throw bad('NO_CHANGE', 'ລຸ້ນນີ້ຖືກເລືອກຢູ່ແລ້ວ');
       const cat = (await c.query('SELECT * FROM categories WHERE code=$1', [b.category])).rows[0];
@@ -557,8 +557,19 @@ module.exports = function adminApi({ pool, config }) {
   r.get('/reports', need('reports.ops'), async (req, res) => {
     const shirts = (await pool.query(`SELECT p.shirt_size, count(*)::int AS n FROM participants p JOIN registrations r ON r.id=p.registration_id
       WHERE r.status='active' GROUP BY 1 ORDER BY 1`)).rows;
-    const divisions = (await pool.query(`SELECT r.category_code, p.gender, count(*)::int AS n FROM participants p JOIN registrations r ON r.id=p.registration_id
-      WHERE r.status='active' GROUP BY 1,2 ORDER BY 1,2`)).rows;
+    const settings = await sh.loadSettings(pool);
+    const people = (await pool.query(`SELECT r.category_code, p.gender, p.dob::text AS dob FROM participants p JOIN registrations r ON r.id=p.registration_id
+      WHERE r.status='active'`)).rows;
+    const div = new Map();
+    for (const x of people) {
+      const age_group = ageGroup(x.category_code, ageOn(x.dob, settings.eventDate));
+      const k = [x.category_code, x.gender, age_group].join('|');
+      if (!div.has(k)) div.set(k, { category_code: x.category_code, gender: x.gender, age_group, n: 0 });
+      div.get(k).n += 1;
+    }
+    const order = { general: 1, senior: 2, family: 3 };
+    const divisions = [...div.values()].sort((a, b) => (order[a.category_code] - order[b.category_code])
+      || a.gender.localeCompare(b.gender) || a.age_group.localeCompare(b.age_group));
     const out = { shirts, divisions };
     if (can(req.staff, 'reports.finance')) {
       out.revenue = (await pool.query(`SELECT category_code, count(*)::int AS registrations, coalesce(sum(confirmed_amount),0)::bigint AS confirmed
@@ -573,16 +584,16 @@ module.exports = function adminApi({ pool, config }) {
   r.get('/export/participants.csv', need('export.participants'), async (req, res) => {
     const settings = await sh.loadSettings(pool);
     const rows = (await pool.query(`
-      SELECT r.reference, r.reg_type, c.name_lo, r.team_name, p.position, p.full_name, p.gender, p.dob, r.distance_km, p.shirt_size,
+      SELECT r.reference, r.reg_type, r.category_code, c.name_lo, r.team_name, p.position, p.full_name, p.gender, p.dob, r.distance_km, p.shirt_size,
              r.contact_name, r.contact_phone, r.emergency_name, r.emergency_phone, r.payment_status, p.bib,
              p.kit_collected_at, p.checked_in_at, r.status, r.created_at
         FROM participants p JOIN registrations r ON r.id=p.registration_id JOIN categories c ON c.code=r.category_code
        ORDER BY r.created_at, r.id, p.position`)).rows;
-    const header = ['ລະຫັດລົງທະບຽນ', 'ປະເພດ', 'ລຸ້ນ', 'ຊື່ທີມ', 'ລຳດັບໃນທີມ', 'ຊື່ ແລະ ນາມສະກຸນ', 'ເພດ', 'ວັນເດືອນປີເກີດ', 'ອາຍຸໃນວັນແຂ່ງ',
+    const header = ['ລະຫັດລົງທະບຽນ', 'ປະເພດ', 'ລຸ້ນ', 'ຊື່ທີມ', 'ລຳດັບໃນທີມ', 'ຊື່ ແລະ ນາມສະກຸນ', 'ເພດ', 'ວັນເດືອນປີເກີດ', 'ອາຍຸໃນວັນແຂ່ງ', 'ກຸ່ມອາຍຸ (ລາງວັນ)',
       'ໄລຍະທາງ (KM)', 'ຂະໜາດເສື້ອ', 'ຜູ້ຕິດຕໍ່', 'ເບີ WhatsApp', 'ຜູ້ຕິດຕໍ່ສຸກເສີນ', 'ເບີສຸກເສີນ', 'ສະຖານະການຈ່າຍ', 'BIB',
       'ຮັບເຄື່ອງແລ້ວ', 'ເວລາຮັບເຄື່ອງ', 'ເຊັກອິນແລ້ວ', 'ເວລາເຊັກອິນ', 'ສະຖານະລົງທະບຽນ', 'ວັນທີລົງທະບຽນ'];
     const data = rows.map((x) => [x.reference, x.reg_type === 'family' ? 'Family' : 'ບຸກຄົນ', x.name_lo, x.team_name, x.position, x.full_name,
-      sh.GENDER_LABELS[x.gender], x.dob, ageOn(x.dob, settings.eventDate), x.distance_km, x.shirt_size, x.contact_name, x.contact_phone,
+      sh.GENDER_LABELS[x.gender], x.dob, ageOn(x.dob, settings.eventDate), ageGroup(x.category_code, ageOn(x.dob, settings.eventDate)), x.distance_km, x.shirt_size, x.contact_name, x.contact_phone,
       x.emergency_name, x.emergency_phone, sh.PAYMENT_LABELS[x.payment_status], x.bib, yes(x.kit_collected_at), sh.fmtVientiane(x.kit_collected_at),
       yes(x.checked_in_at), sh.fmtVientiane(x.checked_in_at), sh.STATUS_LABELS[x.status], sh.fmtVientiane(x.created_at)]);
     await sh.audit(pool, req.staff.id, 'export.participants', 'export', null, { rows: data.length });

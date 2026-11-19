@@ -43,7 +43,7 @@
         <p class="small">ຄົນທີ ${c.baseMembers + 1} ເປັນຕົ້ນໄປ ເພີ່ມຄົນລະ <b>${lak(c.extraFee)}</b>. ຢ່າງໜ້ອຍ ${c.minMembers} ຄົນຕໍ່ທີມ.</p>`;
     } else {
       detail = `<div class="price">${lak(c.baseFee)} <span class="small muted">/ ຄົນ</span></div>
-        <p class="small">ແບ່ງປະເພດ ຊາຍ ແລະ ຍິງ.${c.minAge ? ` ອາຍຸ ${c.minAge} ປີຂຶ້ນໄປ ໃນວັນແຂ່ງຂັນ.` : ''}</p>`;
+        <p class="small">ແບ່ງປະເພດ ຊາຍ ແລະ ຍິງ.${c.minAge ? ` ອາຍຸ ${c.minAge} ປີຂຶ້ນໄປ ໃນວັນແຂ່ງຂັນ.` : ''}${(c.ageGroups || []).length > 1 ? ` ລາງວັນແບ່ງກຸ່ມອາຍຸ: ${c.ageGroups.map(esc).join(' / ')}.` : ''}</p>`;
     }
     return `<div class="card cat-card"><h3>${esc(c.name)}</h3><span class="dist">${c.distanceKm} KM</span>${detail}</div>`;
   }).join('');

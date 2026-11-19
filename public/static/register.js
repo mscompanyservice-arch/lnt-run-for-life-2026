@@ -54,8 +54,10 @@
     const age = ageOn(state.members[i].dob, cfg.eventDate);
     if (age !== null && age >= 0) {
       const c = cat();
-      const okSenior = !c || !c.minAge || age >= c.minAge;
-      ageNote = `<div class="hint">ອາຍຸໃນວັນແຂ່ງຂັນ (${laoDate(cfg.eventDate)}): <b>${age} ປີ</b>${okSenior ? '' : ` — <span class="field-error">ບໍ່ເຖິງ ${c.minAge} ປີ ສຳລັບລຸ້ນອາວຸໂສ</span>`}</div>`;
+      const okAge = !c || !c.minAge || age >= c.minAge;
+      const groups = (c && c.ageGroups) || [];
+      const grp = okAge && groups.length > 1 ? (age <= 34 ? groups[0] : groups[groups.length - 1]) : '';
+      ageNote = `<div class="hint">ອາຍຸໃນວັນແຂ່ງຂັນ (${laoDate(cfg.eventDate)}): <b>${age} ປີ</b>${grp ? ` · ກຸ່ມລາງວັນ: <b>${esc(grp)}</b>` : ''}${okAge ? '' : ` — <span class="field-error">ບໍ່ເຖິງ ${c.minAge} ປີ ສຳລັບ${esc(c.name)}</span>`}</div>`;
     }
     return `<label class="req">ວັນເດືອນປີເກີດ</label>
       <div class="choice dob-grid">${sel('d', days, d, 'ວັນ')}${sel('m', months, m, 'ເດືອນ')}${sel('y', years.map((yy) => [yy, yy]), y, 'ປີ')}</div>
@@ -85,7 +87,8 @@
       <label class="opt ${state.category === x.code ? 'selected' : ''}"><input type="radio" name="category" value="${x.code}" ${state.category === x.code ? 'checked' : ''}>
         <span><b>${esc(x.name)} · ${x.distanceKm} KM</b>
         ${x.code === 'family' ? `${lak(x.baseFee)} / ທີມ ${x.baseMembers} ຄົນ, ເພີ່ມຄົນລະ ${lak(x.extraFee)}` : `${lak(x.baseFee)} / ຄົນ`}
-        ${x.minAge ? `<br><span class="small muted">ອາຍຸ ${x.minAge} ປີຂຶ້ນໄປ ໃນວັນແຂ່ງຂັນ</span>` : ''}</span></label>`).join('')}</div>${errHtml('category')}</div>`;
+        ${x.minAge ? `<br><span class="small muted">ອາຍຸ ${x.minAge} ປີຂຶ້ນໄປ ໃນວັນແຂ່ງຂັນ</span>` : ''}
+        ${(x.ageGroups || []).length > 1 ? `<br><span class="small muted">ລາງວັນແບ່ງກຸ່ມອາຍຸ: ${x.ageGroups.map(esc).join(' / ')}</span>` : ''}</span></label>`).join('')}</div>${errHtml('category')}</div>`;
 
     if (c) {
       h += `<div class="card"><h2>2. ຂໍ້ມູນ${isFamily() ? 'ທີມ' : 'ຜູ້ແລ່ນ'}</h2>
@@ -212,7 +215,7 @@
         else {
           const a = ageOn(m.dob, cfg.eventDate);
           if (a < 0) errors[`members.${i}.dob`] = 'ວັນເກີດບໍ່ຖືກຕ້ອງ';
-          else if (c.minAge && a < c.minAge) errors[`members.${i}.dob`] = `ລຸ້ນອາວຸໂສ ຕ້ອງມີອາຍຸ ${c.minAge} ປີຂຶ້ນໄປ ໃນວັນແຂ່ງຂັນ (ອາຍຸໃນວັນແຂ່ງ: ${a} ປີ)`;
+          else if (c.minAge && a < c.minAge) errors[`members.${i}.dob`] = `${c.name} ຕ້ອງມີອາຍຸ ${c.minAge} ປີຂຶ້ນໄປ ໃນວັນແຂ່ງຂັນ (ອາຍຸໃນວັນແຂ່ງ: ${a} ປີ)`;
         }
         if (!m.shirtSize) errors[`members.${i}.shirtSize`] = 'ກະລຸນາເລືອກຂະໜາດເສື້ອ';
       });

@@ -189,7 +189,7 @@
       : `${act === 'kit' ? 'ຮັບເຄື່ອງ' : 'ເຊັກອິນ'}: ${at ? laoDateTime(at) : 'ຍັງ'}`);
     const members = r.participants.map((p) => `<div class="pcard" data-pid="${p.id}">
       <div class="pname">${p.position}. ${esc(p.full_name)} ${p.bib ? `<span class="badge b-confirmed">BIB ${esc(p.bib)}</span>` : ''}</div>
-      <div class="pmeta">${GENDER[p.gender]} · ${laoDate(p.dob)} · ອາຍຸໃນວັນແຂ່ງ ${p.age_on_event} ປີ · ເສື້ອ ${esc(p.shirt_size)}</div>
+      <div class="pmeta">${GENDER[p.gender]} · ${laoDate(p.dob)} · ອາຍຸໃນວັນແຂ່ງ ${p.age_on_event} ປີ${p.age_group ? ` (ກຸ່ມ ${esc(p.age_group)})` : ''} · ເສື້ອ ${esc(p.shirt_size)}</div>
       <div class="pops">
         <div>${can('race.ops') && active ? `<div class="inline-form"><input value="${esc(p.bib || '')}" data-bib placeholder="BIB" maxlength="10" aria-label="BIB">
           <button class="btn small" data-act="saveBib">ບັນທຶກ BIB</button><button class="btn small secondary" data-act="autoBib">ອັດຕະໂນມັດ</button>
@@ -348,8 +348,8 @@
       <div class="cards two">
         <div class="card"><h2>ຈຳນວນເສື້ອຕາມຂະໜາດ</h2><table class="list"><tr><th>ຂະໜາດ</th><th>ຈຳນວນ</th></tr>
           ${d.shirts.map((x) => `<tr><td>${esc(x.shirt_size)}</td><td>${x.n}</td></tr>`).join('')}<tr><td><b>ລວມ</b></td><td><b>${totalShirts}</b></td></tr></table></div>
-        <div class="card"><h2>ຜູ້ເຂົ້າຮ່ວມຕາມປະເພດ</h2><table class="list"><tr><th>ລຸ້ນ</th><th>ເພດ</th><th>ຈຳນວນ</th></tr>
-          ${d.divisions.map((x) => `<tr><td>${CAT[x.category_code]}</td><td>${GENDER[x.gender]}</td><td>${x.n}</td></tr>`).join('')}</table></div>
+        <div class="card"><h2>ຜູ້ເຂົ້າຮ່ວມຕາມປະເພດລາງວັນ</h2><table class="list"><tr><th>ລຸ້ນ</th><th>ເພດ</th><th>ກຸ່ມອາຍຸ</th><th>ຈຳນວນ</th></tr>
+          ${d.divisions.map((x) => `<tr><td>${CAT[x.category_code]}</td><td>${GENDER[x.gender]}</td><td>${esc(x.age_group || '—')}</td><td>${x.n}</td></tr>`).join('')}</table></div>
       </div>
       ${d.revenue ? `<div class="card"><h2>ລາຍຮັບທີ່ຢືນຢັນແລ້ວ</h2><table class="list"><tr><th>ລຸ້ນ</th><th>ການລົງທະບຽນ</th><th>ຍອດ</th></tr>
         ${d.revenue.map((x) => `<tr><td>${CAT[x.category_code]}</td><td>${x.registrations}</td><td>${lak(x.confirmed)}</td></tr>`).join('')}
@@ -367,7 +367,7 @@
     view.innerHTML = `<h1>ຕັ້ງຄ່າງານ</h1>
       <form class="card" id="setForm"><h2>ຂໍ້ມູນງານ</h2>
         ${t('eventName', 'ຊື່ງານ')}<label for="s-eventDate">ວັນແຂ່ງຂັນ</label><input id="s-eventDate" data-s="eventDate" type="date" value="${esc(s.eventDate)}">
-        <div class="hint">ອາຍຸລຸ້ນອາວຸໂສ ຄິດໄລ່ຕາມວັນນີ້</div>
+        <div class="hint">ອາຍຸ ແລະ ກຸ່ມອາຍຸ ຄິດໄລ່ຕາມວັນນີ້</div>
         ${t('province', 'ສະຖານທີ່ / ແຂວງ')}${t('meetingPoint', 'ຈຸດນັດພົບ', 'ປ່ອຍວ່າງ = ສະແດງ “ຈະແຈ້ງໃຫ້ຊາບພາຍຫຼັງ”')}${t('meetingTime', 'ເວລານັດພົບ', 'ເຊັ່ນ 05:30 ໂມງ')}
         <h2 class="mt">ການລົງທະບຽນ</h2>
         <label class="check"><input type="checkbox" data-s="registrationOpen" ${s.registrationOpen ? 'checked' : ''}> ເປີດຮັບລົງທະບຽນ</label>
@@ -376,8 +376,8 @@
         <div class="hint">ນັບ <b>ຈຳນວນຜູ້ເຂົ້າຮ່ວມແຕ່ລະຄົນ</b> (ທີມ Family 5 ຄົນ = 5) ໃນທຸກການລົງທະບຽນທີ່ບໍ່ຖືກຍົກເລີກ ທັງຈ່າຍແລ້ວ ແລະ ຍັງບໍ່ຈ່າຍ. ປ່ອຍວ່າງ = ບໍ່ຈຳກັດ.</div>
         <label for="s-sizes">ຂະໜາດເສື້ອ (ຂັ້ນດ້ວຍ ,)</label><input id="s-sizes" data-s="shirtSizes" type="text" value="${esc((s.shirtSizes || []).join(', '))}">
         <label>ເລກ BIB ເລີ່ມຕົ້ນ (ໃຊ້ກັບປຸ່ມ “ອັດຕະໂນມັດ”)</label><div class="choice dob-grid">
-          <input data-bib="general" type="number" value="${bib.general}" aria-label="ທົ່ວໄປ"><input data-bib="senior" type="number" value="${bib.senior}" aria-label="ອາວຸໂສ"><input data-bib="family" type="number" value="${bib.family}" aria-label="Family"></div>
-        <div class="hint">ທົ່ວໄປ / ອາວຸໂສ / Family</div>
+          <input data-bib="general" type="number" value="${bib.general}" aria-label="ທົ່ວໄປ"><input data-bib="senior" type="number" value="${bib.senior}" aria-label="Masters"><input data-bib="family" type="number" value="${bib.family}" aria-label="Family"></div>
+        <div class="hint">ທົ່ວໄປ / Masters / Family</div>
         <h2 class="mt">ການຈ່າຍເງິນ ແລະ ຕິດຕໍ່</h2>
         ${t('bankName', 'ທະນາຄານ')}${t('bankAccountName', 'ຊື່ບັນຊີ')}${t('bankAccountNumber', 'ເລກບັນຊີ')}${t('whatsapp', 'ເບີ WhatsApp ຜູ້ຈັດງານ')}${ta('contactNote', 'ຂໍ້ມູນຕິດຕໍ່ເພີ່ມເຕີມ')}
         <h2 class="mt">ເນື້ອຫາໜ້າເວັບ</h2>${ta('benefits', 'ສິ່ງທີ່ຜູ້ເຂົ້າຮ່ວມຈະໄດ້ຮັບ')}${ta('instructions', 'ຄຳແນະນຳກ່ຽວກັບງານ')}

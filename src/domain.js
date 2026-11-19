@@ -6,6 +6,18 @@ const CATEGORY_CODES = ['general', 'senior', 'family'];
 // Distance is fixed per category and enforced again by a DB CHECK constraint.
 const CATEGORY_DISTANCE = { general: 10, senior: 5, family: 5 };
 const PAYMENT_STATUSES = ['unpaid', 'awaiting_review', 'confirmed', 'rejected'];
+// Prize age groups per category, by completed age on the event date (organizer decision, 19 Nov 2026).
+// Registration minimum ages live in categories.min_age (general 15, senior/Masters 40).
+const AGE_GROUPS = {
+  general: [{ min: 0, max: 34, label: '15–34 ປີ' }, { min: 35, max: null, label: '35 ປີຂຶ້ນໄປ' }],
+  senior: [{ min: 0, max: null, label: '40 ປີຂຶ້ນໄປ' }],
+  family: [],
+};
+function ageGroup(code, age) {
+  if (age === null || age === undefined || age < 0) return '';
+  const g = (AGE_GROUPS[code] || []).find((x) => age >= x.min && (x.max === null || age <= x.max));
+  return g ? g.label : '';
+}
 
 class AppError extends Error {
   constructor(status, code, message, extra) {
@@ -95,7 +107,7 @@ function validateRegistration(body, { categories, settings }) {
   const isFamily = category.code === 'family';
   const distance = CATEGORY_DISTANCE[category.code];
   if (body.distanceKm !== undefined && Number(body.distanceKm) !== distance) {
-    throw bad('DISTANCE_MISMATCH', 'ໄລຍະທາງບໍ່ກົງກັບລຸ້ນທີ່ເລືອກ. ລຸ້ນທົ່ວໄປ 10 KM, ລຸ້ນອາວຸໂສ ແລະ Family 5 KM');
+    throw bad('DISTANCE_MISMATCH', 'ໄລຍະທາງບໍ່ກົງກັບລຸ້ນທີ່ເລືອກ. ລຸ້ນທົ່ວໄປ 10 KM, ລຸ້ນ Masters ແລະ Family 5 KM');
   }
 
   const shirtSizes = settings.shirtSizes || [];
@@ -156,7 +168,7 @@ function validateRegistration(body, { categories, settings }) {
       age = ageOn(dob, eventDate);
       if (age === null || age < 0 || m.dob < '1900-01-01') fail(p + 'dob', 'ວັນເດືອນປີເກີດບໍ່ຖືກຕ້ອງ');
       else if (category.min_age !== null && category.min_age !== undefined && age < Number(category.min_age)) {
-        fail(p + 'dob', `ລຸ້ນອາວຸໂສ ຕ້ອງມີອາຍຸ ${category.min_age} ປີຂຶ້ນໄປ ໃນວັນແຂ່ງຂັນ (${eventDate}). ອາຍຸໃນວັນແຂ່ງ: ${age} ປີ`);
+        fail(p + 'dob', `${category.name_lo || 'ລຸ້ນນີ້'} ຕ້ອງມີອາຍຸ ${category.min_age} ປີຂຶ້ນໄປ ໃນວັນແຂ່ງຂັນ (${eventDate}). ອາຍຸໃນວັນແຂ່ງ: ${age} ປີ`);
       }
     }
     const shirtSize = shirtSizes.includes(m.shirtSize) ? m.shirtSize : null;
@@ -193,6 +205,6 @@ function validateRegistration(body, { categories, settings }) {
 const REF_ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
 
 module.exports = {
-  AppError, bad, GENDERS, CATEGORY_CODES, CATEGORY_DISTANCE, PAYMENT_STATUSES,
+  AppError, bad, GENDERS, CATEGORY_CODES, CATEGORY_DISTANCE, PAYMENT_STATUSES, AGE_GROUPS, ageGroup,
   computeFee, parseDate, ageOn, normalizePhone, cleanText, normName, validateRegistration, REF_ALPHABET,
 };
