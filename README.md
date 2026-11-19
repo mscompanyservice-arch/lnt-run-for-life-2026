@@ -2,7 +2,10 @@
 
 Public registration website (Lao), private participant status pages, and a protected admin back office for **LNT RUN FOR LIFE 2026** (26 December 2026, Luang Namtha, Laos).
 
-> **Status (19 Nov 2026): partly deployed — not live.** The Supabase project `lnt-run-2026` (ref `rrgfqxraxnixjoqttots`, Singapore, free plan) exists. Its database schema is applied and locked down (RLS on, no anon access). The server code has **not** been uploaded yet, and there is **no public URL yet**. See [Finishing the Supabase + Cloudflare deployment](#finishing-the-supabase--cloudflare-deployment).
+> **Status (19 Nov 2026): LIVE at https://run.msidgroup.com** (backup URL: https://lnt-run-2026.mscompanyservice.workers.dev).
+> Hosting: Cloudflare Worker `lnt-run-2026` → Supabase Edge Function `lnt` (project `lnt-run-2026`, ref `rrgfqxraxnixjoqttots`, Singapore, free plan) → Supabase Postgres.
+> Verified live: registration and pricing, idempotent retry, private lookup, wrong-code refusal, price tampering and age-48 rejection, real/fake/4.9 MB proof uploads, admin endpoints closed to the public. Test data was deleted afterwards.
+> **Not yet verified:** access from Lao mobile and Lao Wi-Fi networks (organizer must test). Owner account: created by the organizer at /admin with the one-time setup code.
 
 ## Architecture
 
@@ -80,12 +83,12 @@ Done:
 - Supabase project created; migrations `001`–`003` applied. `app_secret` is generated inside the database, so there is no secret to type anywhere.
 - Edge build verified locally under Deno 2.9 with the real Worker code in front of it. The full browser flow passed: register, upload, setup, confirm, BIB.
 
-Remaining (about 15 minutes once GitHub access works):
-1. Push this repository to GitHub as **public** (code only, no data or secrets): `node edge/build.mjs` → commit → push.
-2. Edit `edge/function/index.ts` (OWNER, COMMIT), then deploy it as function `lnt` with **verify_jwt = false** (Supabase MCP `deploy_edge_function`, or `supabase functions deploy lnt --no-verify-jwt`).
-3. Cloudflare dashboard → Workers → Create → paste `deploy/cloudflare-worker/worker.js` → Deploy → Settings → Domains & Routes → Add custom domain `run.msidgroup.com`.
-4. Create the one-time setup code: `INSERT INTO setup_code (id, code_hash) VALUES (1, encode(sha256(('setup:' || 'YOURCODE')::bytea),'hex'));`, open `/admin`, and create the owner account with your own password.
-5. Run the launch checklist below from Lao networks.
+How to redeploy after code changes:
+1. `node edge/build.mjs` → commit → push to `main` (public repo, code only).
+2. Put the new commit hash into `edge/function/index.ts`, then deploy it as function `lnt` with **verify_jwt = false** (Supabase MCP `deploy_edge_function`, or `supabase functions deploy lnt --no-verify-jwt`).
+3. The Worker rarely changes; if it does, paste `deploy/cloudflare-worker/worker.js` into the `lnt-run-2026` editor and deploy.
+4. (Only if no owner exists) create a one-time setup code: `INSERT INTO setup_code (id, code_hash) VALUES (1, encode(sha256(('setup:' || 'YOURCODE')::bytea),'hex'));`, open `/admin`, and create the owner account with your own password.
+
 
 ## Deployment (other options)
 
@@ -162,3 +165,7 @@ test/       domain.test.js, api.test.js (real PostgreSQL)
 deploy/     docker-compose.yml, Caddyfile, render.yaml
 docs/       ຄູ່ມືການໃຊ້ງານ.md (Lao staff guide), TEST-REPORT.md
 ```
+
+## Supabase free-plan notes
+- Free projects pause after about 7 days with no activity. While registration is open, normal traffic keeps the project active. If it pauses, restore it from the Supabase dashboard; data is kept. Upgrading to Pro (paid) removes this risk.
+- Daily automatic backups are kept on Supabase for a short period. Also run `pg_dump` exports yourself (see Backup).

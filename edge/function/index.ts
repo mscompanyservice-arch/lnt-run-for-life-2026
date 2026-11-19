@@ -1,4 +1,3 @@
-// Supabase Edge Function "lnt" (deploy with verify_jwt = false; the app does its own authentication).
-// Replace OWNER and COMMIT after pushing this repository to GitHub (public), then deploy.
+// Supabase Edge Function "lnt" (deployed with verify_jwt = false; the app does its own authentication).
 import './ext-init.ts';
-import 'https://cdn.jsdelivr.net/gh/OWNER/lnt-run-for-life-2026@COMMIT/edge/dist/app.js';
+import 'https://cdn.jsdelivr.net/gh/mscompanyservice-arch/lnt-run-for-life-2026@416b3475188d6e1941c2eb2445884bd34bb5ec9b/edge/dist/app.js';
