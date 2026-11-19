@@ -28,7 +28,7 @@ There are no external CDNs, analytics or third-party scripts. That keeps pages w
 ### Key rules (enforced on the server)
 | Rule | Where |
 |---|---|
-| Fees: General 380,000; Senior 330,000; Family `880000 + max(0, n−3) × 299000` LAK. Integers only | `src/domain.js computeFee`, DB `CHECK total_amount = …` |
+| Fees (live, editable in admin): General 380,000; Masters 350,000; Family `899000 + max(0, n−3) × 299000` LAK (seed values in migration 001 differ). Integers only | `src/domain.js computeFee`, DB `CHECK total_amount = …` |
 | Distance fixed by category (General 10 KM, Senior/Family 5 KM) | validation + DB `CHECK` constraint |
 | Masters (code `senior`, 5 KM): age ≥ 40 **on the event date** (born 1986‑12‑26 ✅, 1986‑12‑27 ❌). General 10 KM: age ≥ 15. Changed 19 Nov 2026 to match the published poster (migration 005; was 45, earlier 48) | `ageOn()`, `categories.min_age` |
 | Prize age groups (age on event date): General 15–34 / 35+, Masters 40+, Family none. Shown on the site, in admin, in the participant CSV and the division report | `AGE_GROUPS`, `ageGroup()` |
