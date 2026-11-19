@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="lo">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LNT RUN FOR LIFE 2026 — ລົງທະບຽນ</title>
+<meta name="description" content="ລົງທະບຽນງານແລ່ນ LNT RUN FOR LIFE 2026, ແຂວງຫຼວງນ້ຳທາ, 26 ທັນວາ 2026">
+<meta name="theme-color" content="#14532d">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/style.css">
+<script src="/static/common.js" defer></script>
+<script src="/static/landing.js" defer></script>
+</head>
+<body>
+<header class="topbar"><div class="wrap">
+  <a class="brand" href="/"><img id="logo" alt="" hidden><span>LNT RUN FOR LIFE 2026</span></a>
+  <nav><a href="/status">ກວດສະຖານະ</a></nav>
+</div></header>
+
+<div class="hero"><div class="wrap">
+  <h1 id="eventName">LNT RUN FOR LIFE 2026</h1>
+  <div class="meta">
+    <div>📅 <span id="eventDate">26 ທັນວາ 2026</span></div>
+    <div>📍 <span id="province">ແຂວງຫຼວງນ້ຳທາ, ສປປ ລາວ</span></div>
+    <div id="meetingRow">🏁 ຈຸດນັດພົບ: <span id="meeting"></span></div>
+  </div>
+  <div id="closedBanner" class="alert warn" hidden></div>
+  <div class="btn-row">
+    <a class="btn" id="registerBtn" href="/register">ລົງທະບຽນ</a>
+    <a class="btn secondary" href="/status">ກວດການລົງທະບຽນຂອງຂ້ອຍ</a>
+  </div>
+  <div class="gallery" id="gallery" hidden></div>
+</div></div>
+
+<main><div class="wrap">
+  <noscript><div class="alert warn">ກະລຸນາເປີດ JavaScript ໃນໂປຣແກຣມທ່ອງເວັບ ເພື່ອລົງທະບຽນ</div></noscript>
+  <div id="loadError" class="alert err" hidden></div>
+
+  <section>
+    <h2>ລຸ້ນການແຂ່ງຂັນ ແລະ ຄ່າລົງທະບຽນ</h2>
+    <div class="cards three" id="categories"><div class="loading">ກຳລັງໂຫຼດ…</div></div>
+  </section>
+
+  <section class="card">
+    <h2>ວິທີລົງທະບຽນ</h2>
+    <ol class="steps">
+      <li>ກົດ <b>“ລົງທະບຽນ”</b> ແລະ ເລືອກລຸ້ນ. ໄລຍະທາງຈະຖືກກຳນົດອັດຕະໂນມັດຕາມລຸ້ນ.</li>
+      <li>ຕື່ມຂໍ້ມູນ, ກວດຄືນ ແລ້ວກົດຢືນຢັນ. ທ່ານຈະໄດ້ຮັບ <b>ລະຫັດລົງທະບຽນ</b> ແລະ <b>ລິ້ງສ່ວນຕົວ</b> — ກະລຸນາບັນທຶກໄວ້.</li>
+      <li>ໂອນເງິນຕາມຂໍ້ມູນການຈ່າຍ ແລ້ວອັບໂຫຼດຮູບຫຼັກຖານການໂອນ.</li>
+      <li>ພະນັກງານຈະກວດ ແລະ ຢືນຢັນການຈ່າຍ. ກວດສະຖານະໄດ້ທຸກເວລາຜ່ານລິ້ງສ່ວນຕົວ.</li>
+    </ol>
+    <p class="muted small">ບໍ່ຕ້ອງຕິດຕັ້ງແອັບ ແລະ ບໍ່ຕ້ອງສ້າງບັນຊີ. ໃຊ້ໄດ້ທັງ Android, iPhone ແລະ ຄອມພິວເຕີ.</p>
+  </section>
+
+  <section class="card" id="benefitsCard" hidden><h2>ສິ່ງທີ່ຜູ້ເຂົ້າຮ່ວມຈະໄດ້ຮັບ</h2><div id="benefits" class="prewrap"></div></section>
+  <section class="card" id="instructionsCard" hidden><h2>ຄຳແນະນຳກ່ຽວກັບງານ</h2><div id="instructions" class="prewrap"></div></section>
+
+  <section class="card">
+    <h2>ການຈ່າຍເງິນ</h2>
+    <div id="paymentInfo"></div>
+  </section>
+
+  <section class="card">
+    <h2>ຕິດຕໍ່ຜູ້ຈັດງານ</h2>
+    <div id="contact"></div>
+  </section>
+
+  <section class="card">
+    <h2>ຄຳຖາມທີ່ພົບເລື້ອຍ</h2>
+    <div id="faq"></div>
+  </section>
+</div></main>
+<footer>LNT RUN FOR LIFE 2026 · ແຂວງຫຼວງນ້ຳທາ</footer>
+</body>
+</html>

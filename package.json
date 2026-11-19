@@ -1,0 +1,22 @@
+{
+  "name": "lnt-run-for-life-2026",
+  "version": "1.0.0",
+  "description": "LNT RUN FOR LIFE 2026 registration system",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "migrate": "node scripts/migrate.js",
+    "create-staff": "node scripts/create-staff.js",
+    "test": "node --test --test-concurrency=1 test/*.test.js"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@fontsource/noto-sans-lao": "^5.3.0",
+    "express": "^5.3.0",
+    "pg": "^8.23.1"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  }
+}
