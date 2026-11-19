@@ -30,14 +30,14 @@ test('general male and female entries cost 380,000 and are 10 KM', async () => {
   }
 });
 
-test('senior entries cost 330,000 at 5 KM; exact 48-year boundary', async () => {
-  const ok = await register(H.individual('senior', { dob: '1978-12-26' }));
+test('senior entries cost 330,000 at 5 KM; exact 45-year boundary', async () => {
+  const ok = await register(H.individual('senior', { dob: '1981-12-26' }));
   assert.equal(ok.registration.fee.total, 330000);
   assert.equal(ok.registration.distanceKm, 5);
-  const no = await post('/registrations', H.individual('senior', { dob: '1978-12-27' }));
+  const no = await post('/registrations', H.individual('senior', { dob: '1981-12-27' }));
   assert.equal(no.status, 400);
   assert.equal(no.data.error, 'VALIDATION');
-  assert.ok(no.data.fields['members.0.dob'].includes('48'));
+  assert.ok(no.data.fields['members.0.dob'].includes('45'));
 });
 
 test('family totals for 3, 4, 5, 6 and 10 members; each member stored separately', async () => {

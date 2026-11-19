@@ -16,7 +16,7 @@ test('individual fees', () => {
   assert.equal(computeFee({ base_fee: 330000, base_members: 1, extra_fee: 0 }, 1).total, 330000);
 });
 
-test('age is calculated on event date; 48-year boundary', () => {
+test('age is calculated on event date; 45/48-year boundaries', () => {
   assert.equal(ageOn('1978-12-26', '2026-12-26'), 48);
   assert.equal(ageOn('1978-12-27', '2026-12-26'), 47);
   assert.equal(ageOn('1980-02-29', '2026-12-26'), 46);

@@ -30,7 +30,7 @@ There are no external CDNs, analytics or third-party scripts. That keeps pages w
 |---|---|
 | Fees: General 380,000; Senior 330,000; Family `880000 + max(0, n−3) × 299000` LAK. Integers only | `src/domain.js computeFee`, DB `CHECK total_amount = …` |
 | Distance fixed by category (General 10 KM, Senior/Family 5 KM) | validation + DB `CHECK` constraint |
-| Senior: age ≥ 48 **on the event date** (born 1978‑12‑26 ✅, 1978‑12‑27 ❌) | `ageOn()` |
+| Senior: age ≥ 45 **on the event date** (born 1981‑12‑26 ✅, 1981‑12‑27 ❌). Changed from 48 on 19 Nov 2026 at the organizer's request (migration 004) | `ageOn()` |
 | Family: ≥ 3 members (max 20, editable); every member is a separate participant row | validation, `participants` table |
 | Browser total is never used; a mismatching `clientTotal` is rejected as tampering | `PRICE_MISMATCH` |
 | Double-click / retry → one registration (idempotency key + row lock) | `registrations.idempotency_key UNIQUE` |

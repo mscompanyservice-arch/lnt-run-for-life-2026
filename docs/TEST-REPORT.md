@@ -7,7 +7,7 @@
 | # | Acceptance criterion | Result |
 |---|---|---|
 | 1 | General male & female → 380,000 LAK, 10 KM | ✅ |
-| 2 | Senior → 330,000 LAK, 5 KM; born 1978‑12‑26 accepted, 1978‑12‑27 rejected | ✅ |
+| 2 | Senior → 330,000 LAK, 5 KM; born 1978‑12‑26 accepted, 1978‑12‑27 rejected (rule at the time: 48+; now 45+, boundary 1981‑12‑26 / 1981‑12‑27, verified live 19 Nov 2026) | ✅ |
 | 3 | Family 3/4/5/6/10 → 880,000 / 1,179,000 / 1,478,000 / 1,777,000 / 2,973,000; each member stored as separate participant | ✅ |
 | 4 | Family with 2 members rejected | ✅ |
 | 5 | Tampered `clientTotal` rejected; General@5 KM, Senior@10 KM, Family@10 KM rejected; DB constraint blocks wrong distance | ✅ |
