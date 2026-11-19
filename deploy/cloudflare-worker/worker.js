@@ -22,11 +22,15 @@ export default {
         { status: 502, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' } });
     }
     const out = new Headers(res.headers);
+    // fetch() already decoded the body; drop encoding/length so the edge re-encodes correctly.
+    out.delete('content-encoding');
+    out.delete('content-length');
     if (out.get('x-lnt-html') === '1') {
       out.set('content-type', 'text/html; charset=utf-8');
       out.set('content-security-policy', CSP);
     }
     out.delete('x-lnt-html');
-    return new Response(res.body, { status: res.status, statusText: res.statusText, headers: out });
+    const nullBody = [101, 204, 205, 304].includes(res.status);
+    return new Response(nullBody ? null : res.body, { status: res.status, statusText: res.statusText, headers: out });
   },
 };

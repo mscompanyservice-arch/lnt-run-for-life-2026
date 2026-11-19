@@ -78,10 +78,11 @@ function sniffImage(buf) {
 /** Simple fixed-window rate limiter (per process). */
 function rateLimiter({ windowMs, max, name }) {
   const hits = new Map();
-  setInterval(() => {
+  const timer = setInterval(() => {
     const now = Date.now();
     for (const [k, v] of hits) if (v.reset <= now) hits.delete(k);
-  }, Math.min(windowMs, 60000)).unref();
+  }, Math.min(windowMs, 60000));
+  if (timer && typeof timer.unref === 'function') timer.unref();
   return (req, res, next) => {
     if (process.env.DISABLE_RATE_LIMIT === 'true') return next();
     const key = `${name}:${req.ip}`;
